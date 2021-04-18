@@ -1,183 +1,183 @@
 *************
-Configuration
+配置
 *************
 
-Pitaya uses Viper to control its configuration. Below we describe the configuration variables split by topic. We judge the default values are good for most cases, but might need to be changed for some use cases.
+Pitaya使用Viper来控制其配置。下面我们按主题来描述配置变量的划分。我们认为这些配置的默认值可以满足大多数场景，但某些场景下可能需要改变。
 
 Service Discovery
 =================
 
-These configuration values configure service discovery for the default etcd service discovery module.
- They only need to be set if the application runs in cluster mode.
+这些配置值用于设置etcd服务发现模块。
+ 只有当应用程序在集群模式下运行时，才需要设置这些值。
 
 .. list-table::
   :widths: 15 10 10 50
   :header-rows: 1
   :stub-columns: 1
 
-  * - Configuration
-    - Default value
-    - Type
-    - Description
+  * - 配置
+    - 默认值
+    - 类型
+    - 描述
   * - pitaya.cluster.sd.etcd.dialtimeout
     - 5s
     - time.Time
-    - Dial timeout value passed to the service discovery etcd client
+    - 传递给服务发现etcd客户端的拨号超时时间。
   * - pitaya.cluster.sd.etcd.endpoints
     - localhost:2379
     - string
-    - List of comma separated etcd endpoints
+    - 逗号分隔的 etcd 端点列表
   * - pitaya.cluster.sd.etcd.user
     - 
     - string
-    - Username to connect to etcd
+    - 连接到etcd的用户名
   * - pitaya.cluster.sd.etcd.pass
     - 
     - string
-    - Password to connect to etcd
+    - 连接到etcd的密码
   * - pitaya.cluster.sd.etcd.heartbeat.ttl
     - 60s
     - time.Time
-    - Hearbeat interval for the etcd lease
+    - etcd lease 的心跳间隔。
   * - pitaya.cluster.sd.etcd.grantlease.timeout
     - 60s
     - time.Duration
-    - Timeout for etcd lease
+    - etcd lease 的超时时间
   * - pitaya.cluster.sd.etcd.grantlease.maxretries
     - 15
     - int
-    - Maximum number of attempts to etcd grant lease
+    - 最多尝试etcd lease的次数
   * - pitaya.cluster.sd.etcd.grantlease.retryinterval
     - 5s
     - time.Duration
-    - Interval between each grant lease attempt
+    - 每次尝试etcd lease之间的时间间隔
   * - pitaya.cluster.sd.etcd.revoke.timeout
     - 5s
     - time.Duration
-    - Timeout for etcd's revoke function
+    - etcd的撤销功能超时
   * - pitaya.cluster.sd.etcd.heartbeat.log
     - false
     - bool
-    - Whether etcd heartbeats should be logged in debug mode
+    - 是否应该在调试模式下记录etcd的心跳日志
   * - pitaya.cluster.sd.etcd.prefix
     - pitaya/
     - string
-    - Prefix used to avoid collisions with different pitaya applications, servers must have the same prefix to be able to see each other
+    - 前缀用于避免不同的pitaya应用之间的冲突，服务器必须有相同的前缀才能够看到对方
   * - pitaya.cluster.sd.etcd.syncservers.interval
     - 120s
     - time.Duration
-    - Interval between server syncs performed by the service discovery module
+    - 服务发现模块执行的服务器同步的时间间隔。
   * - pitaya.cluster.sd.etcd.shutdown.delay
     - 10ms
     - time.Duration
-    - Time to wait to shutdown after deregistering from service discovery
+    - 从服务发现中取消注册后等待关机的时间
   * - pitaya.cluster.sd.etcd.servertypeblacklist
     - nil
     - []string
-    - A list of server types that should be ignored by the service discovery
+    - 服务发现应该忽略的服务器类型列表。
   * - pitaya.cluster.sd.etcd.syncserversparallelism
     - 10
     - int
-    - The number of goroutines that should be used while getting server information on etcd initialization
+    - 在etcd初始化时用于获取服务器信息使用的goroutine数量。
 
-RPC Service
+RPC 服务
 ===========
 
-The configurations only need to be set if the RPC Service is enabled with the given type.
+只有当RPC服务启用了给定类型时，才需要设置配置。
 
 .. list-table::
   :widths: 15 10 10 50
   :header-rows: 1
   :stub-columns: 1
 
-  * - Configuration
-    - Default value
-    - Type
-    - Description
+  * - 配置
+    - 默认值
+    - 类型
+    - 描述
   * - pitaya.buffer.cluster.rpc.server.nats.messages
     - 75
     - int
-    - Size of the buffer that for the nats RPC server accepts before starting to drop incoming messages
+    - nats RPC服务器在开始丢弃传入消息之前接受的缓冲区大小。
   * - pitaya.buffer.cluster.rpc.server.nats.push
     - 100
     - int
-    - Size of the buffer that the nats RPC server creates for push messages
+    - nats RPC服务器为推送消息创建的缓冲区大小。
   * - pitaya.cluster.rpc.client.grpc.dialtimeout
     - 5s
     - time.Time
-    - Timeout for the gRPC client to establish the connection
+    - gRPC客户端建立连接的超时时间
   * - pitaya.cluster.rpc.client.grpc.lazyconnection
     - false
     - bool
-    - Whether the gRPC client should use a lazy connection, that is, connect only when a request is made to that server
+    - gRPC客户端是否应该使用懒惰连接，即只有在向该服务器发出请求时才连接。
   * - pitaya.cluster.rpc.client.grpc.requesttimeout
     - 5s
     - time.Time
-    - Request timeout for RPC calls with the gRPC client
+    - 请求gRPC客户端的RPC调用超时。
   * - pitaya.cluster.rpc.client.nats.connect
     - nats://localhost:4222
     - string
-    - Nats address for the client
+    - Nats客户端使用的地址
   * - pitaya.cluster.rpc.client.nats.connectiontimeout
     - 5s
     - time.Duration
-    - Timeout for the nats client to establish the connection
+    - nats客户端建立连接的超时时间。
   * - pitaya.cluster.rpc.client.nats.requesttimeout
     - 5s
     - time.Time
-    - Request timeout for RPC calls with the nats client
+    - 使用nats客户端的RPC调用请求超时。
   * - pitaya.cluster.rpc.client.nats.maxreconnectionretries
     - 15
     - int
-    - Maximum number of retries to reconnect to nats for the client
+    - 客户端重新连接到nats的最大重试次数。
   * - pitaya.cluster.rpc.server.nats.connect
     - nats://localhost:4222
     - string
-    - Nats address for the server
+    - Nats服务器的地址
   * - pitaya.cluster.rpc.server.nats.connectiontimeout
     - 5s
     - time.Duration
-    - Timeout for the nats server to establish the connection
+    - nats服务器建立连接的超时。
   * - pitaya.cluster.rpc.server.nats.maxreconnectionretries
     - 15
     - int
-    - Maximum number of retries to reconnect to nats for the server
+    - 服务器重新连接到nats的最大重试次数。
   * - pitaya.cluster.rpc.server.grpc.port
     - 3434
     - int
-    - The port that the gRPC server listens to
+    - gRPC服务器监听的端口。
   * - pitaya.concurrency.remote.service
     - 30
     - int
-    - Number of goroutines processing messages at the remote service for the nats RPC service
+    - nats RPC服务在远程服务上处理消息的goroutine数量。
   * - pitaya.worker.redis.url
     - localhost:6379
     - string
-    - Redis url pitaya workers use to register jobs
+    - 用来注册pitaya worker的redis的地址
   * - pitaya.worker.redis.pool
     - 10
     - string
-    - Number of connections to keep with Redis
+    - 与Redis保持的连接数
   * - pitaya.worker.redis.password
     - ""
     - string
-    - Redis password to connect to pitaya workers redis
+    - 用来注册pitaya worker的redis的密码
   * - pitaya.worker.concurrency
     - 1
     - int
-    - Number of workers to execute job
+    - 执行job的worker数量
   * - pitaya.worker.namespace
     - ""
     - string
-    - Worker namespace, can be used to differ stacks in a blue-green deployment
+    - worker命名空间，可用于蓝绿部署中的不同堆栈。
   * - pitaya.worker.retry.enabled
     - true
     - bool
-    - If true, retry job if errored for max times
+    - 如果为真且在最大时间内出错，则重试job
   * - pitaya.worker.retry.max
     - 5
     - int
-    - Max number of job retries
+    - 最大重试job次数
   * - pitaya.worker.retry.exponential
     - 2
     - int
@@ -185,17 +185,17 @@ The configurations only need to be set if the RPC Service is enabled with the gi
   * - pitaya.worker.retry.minDelay
     - 0
     - int
-    - Min time to wait on backoff to retry job
+    - 等待后退重试job的最短时间。
   * - pitaya.worker.retry.maxDelay
     - 10
     - int
-    - Max time to wait on backoff to retry job
+    - 等待后退重试工作的最大时间。
   * - pitaya.worker.retry.maxRandom
     - 10
     - int
-    - Random time to wait during backoff
+    - 后退过程中随机等待的时间
 
-Connection
+连接
 ==========
 
 .. list-table::
@@ -203,30 +203,30 @@ Connection
   :header-rows: 1
   :stub-columns: 1
 
-  * - Configuration
-    - Default value
-    - Type
-    - Description
+  * - 配置
+    - 默认值
+    - 类型
+    - 描述
   * - pitaya.handler.messages.compression
     - true
     - bool
-    - Whether messages between client and server should be compressed
+    - 客户端和服务器之间的信息是否应该被压缩
   * - pitaya.heartbeat.interval
     - 30s
     - time.Time
-    - Keepalive heartbeat interval for the client connection
+    - 保持客户端连接的心跳间隔
   * - pitaya.conn.ratelimiting.interval
     - 1s
     - time.Duration
-    - Window of time to count requests
+    - 计算请求的时间窗口
   * - pitaya.conn.ratelimiting.limit
     - 20
     - int
-    - Max number of requests allowed in a interval
+    - 一个时间段内允许的最大请求数
   * - pitaya.conn.ratelimiting.forcedisable
     - false
     - bool
-    - If true, ignores rate limiting even when added with WithWrappers
+    - 如果为真，即使在添加WithWrappers时也会忽略速率限制。
 
 Metrics Reporting
 =================
@@ -236,112 +236,112 @@ Metrics Reporting
   :header-rows: 1
   :stub-columns: 1
 
-  * - Configuration
-    - Default value
-    - Type
-    - Description
+  * - 配置
+    - 默认值
+    - 类型
+    - 描述
   * - pitaya.metrics.statsd.enabled
     - false
     - bool
-    - Whether statsd reporting should be enabled
+    - 是否启用statsd报告
   * - pitaya.metrics.statsd.host
     - localhost:9125
     - string
-    - Address of the statsd server to send the metrics to
+    - 要发送指标的statsd服务器的地址
   * - pitaya.metrics.statsd.prefix
     - pitaya.
     - string
-    - Prefix of the metrics reported to statsd
+    - 向statsd报告的指标前缀
   * - pitaya.metrics.statsd.rate
     - 1
     - int
-    - Statsd metrics rate
+    - statsd 指标率
   * - pitaya.metrics.prometheus.enabled
     - false
     - bool
-    - Whether prometheus reporting should be enabled
+    - 是否应启用prometheus报告
   * - pitaya.metrics.prometheus.port
     - 9090
     - int
-    - Port to expose prometheus metrics
+    - 暴露prometheus指标的端口。
   * - pitaya.metrics.constTags
     - map[string]string{}
     - map[string]string
-    - Constant tags to be added to reported metrics
+    - 要添加到报告指标的常量标签
   * - pitaya.metrics.additionalTags
     - map[string]string{}
     - map[string]string
-    - Additional tags to reported metrics, the map is from tag to default value
+    - 报告指标的附加标签，map的key标签value为默认值。
   * - pitaya.metrics.periodicMetrics.period
     - 15s
     - string
-    - Period that system metrics will be reported
+    - 报告系统指标的时期
   * - pitaya.metrics.custom.counters
     - []map[string]interface{}
     - []map[string]interface
-    - Custom metrics counter
+    - 自定义指标计数器
   * - pitaya.metrics.custom.counters[].Subsystem
     - ""
     - string
-    - Custom counter subsystem name
+    - 自定义计数器的子系统名称
   * - pitaya.metrics.custom.counters[].Name
     - ""
     - string
-    - Custom counter name, must not be empty
+    - 自定义计数器名称，不得为空
   * - pitaya.metrics.custom.counters[].Help
     - ""
     - string
-    - Custom counter help which explain what is the metric, must not be empty
+    - 用于解释自定义计数器是什么指标，不得为空。
   * - pitaya.metrics.custom.counters[].Labels
     - []string{}
     - []string
-    - Custom counter labels the metric will carry
+    - 指标将会携带的自定义计数器的标签
   * - pitaya.metrics.custom.gauges
     - []map[string]interface{}
     - []map[string]interface
-    - Custom metrics gauge 
+    - 自定义指标的仪表盘
   * - pitaya.metrics.custom.gauges[].Subsystem
     - ""
     - string
-    - Custom gauge subsystem name
+    - 自定义仪表盘的子系统名称
   * - pitaya.metrics.custom.gauges[].Name
     - ""
     - string
-    - Custom gauge name, must not be empty
+    - 自定义仪表盘的名称，不得为空
   * - pitaya.metrics.custom.gauges[].Help
     - ""
     - string
-    - Custom gauge help which explain what is the metric, must not be empty
+    - 用于解释自定义的仪表盘是什么指标，不得为空。
   * - pitaya.metrics.custom.gauges[].Labels
     - []string{}
     - []string
-    - Custom gauge labels the metric will carry
+    - 指标携带的自定义仪表盘标签
   * - pitaya.metrics.custom.summaries
     - []map[string]interface{}
     - []map[string]interface
-    - Custom metrics summary 
+    - 自定义指标摘要
   * - pitaya.metrics.custom.summaries[].Subsystem
     - ""
     - string
-    - Custom summary subsystem name
+    - 自定义摘要子系统名称
   * - pitaya.metrics.custom.summaries[].Name
     - ""
     - string
-    - Custom summary name, must not be empty
+    - 自定义摘要名称，不得为空
   * - pitaya.metrics.custom.summaries[].Help
     - ""
     - string
-    - Custom summary help which explain what is the metric, must not be empty
+    - 用于解释自定义的摘要是什么指标，不得为空。
   * - pitaya.metrics.custom.summaries[].Labels
     - []string{}
     - []string
-    - Custom summary labels the metric will carry
+    - 指标携带的自定义摘要标签
   * - pitaya.metrics.custom.summaries[].Objectives
     - map[float64]float64
     - map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001}
-    - Custom summary objectives with quantiles 
+    - 自定义摘要目标与量化指标
 
-Concurrency
+并发
 ===========
 
 .. list-table::
@@ -349,112 +349,112 @@ Concurrency
   :header-rows: 1
   :stub-columns: 1
 
-  * - Configuration
-    - Default value
-    - Type
-    - Description
+  * - 配置
+    - 默认值
+    - 类型
+    - 描述
   * - pitaya.buffer.agent.messages
     - 100
     - int
-    - Buffer size for received client messages for each agent
+    - 每个agent接收客户信息的缓冲区大小。
   * - pitaya.buffer.handler.localprocess
     - 20
     - int
-    - Buffer size for messages received by the handler and processed locally
+    - handler接收并在本地处理的消息的缓冲区大小。
   * - pitaya.buffer.handler.remoteprocess
     - 20
     - int
-    - Buffer size for messages received by the handler and forwarded to remote servers
+    - handler接收并转发到远程服务器的消息的缓冲区大小。
   * - pitaya.concurrency.handler.dispatch
     - 25
     - int
-    - Number of goroutines processing messages at the handler service
+    - 在handler service中处理信息的goroutine的数量。
 
-Modules
+Module
 =======
 
-These configurations are only used if the modules are created. It is recommended to use Binding Storage module with gRPC RPC service to be able to use all RPC service features.
+这些配置只有在创建Module时才会使用。建议使用Binding Storage模块与gRPC RPC服务，才能使用所有RPC服务功能。
 
 .. list-table::
   :widths: 15 10 10 50
   :header-rows: 1
   :stub-columns: 1
 
-  * - Configuration
-    - Default value
-    - Type
-    - Description
+  * - 配置
+    - 默认值
+    - 类型
+    - 描述
   * - pitaya.session.unique
     - true
     - bool
-    - Whether Pitaya should enforce unique sessions for the clients, enabling the unique sessions module
+    - Pitaya 是否应该为客户强制执行独特的会话，启用独特的会话模块。
   * - pitaya.modules.bindingstorage.etcd.endpoints
     - localhost:2379
     - string
-    - Comma separated list of etcd endpoints to be used by the binding storage module, should be the same as the service discovery etcd
+    - 逗号分隔的 etcd 端点列表，要被Bindings Storage模块使用，应该与服务发现 etcd 相同。
   * - pitaya.modules.bindingstorage.etcd.prefix
     - pitaya/
     - string
-    - Prefix used for etcd, should be the same as the service discovery
+    - etcd的前缀，应该与服务发现的前缀相同。
   * - pitaya.modules.bindingstorage.etcd.dialtimeout
     - 5s
     - time.Time
-    - Timeout to establish the etcd connection
+    - 建立etcd连接的超时
   * - pitaya.modules.bindingstorage.etcd.leasettl
     - 1h
     - time.Time
-    - Duration of the etcd lease before automatic renewal
+    - 自动续约前的etcd lease时间
 
-Default Pipelines
+默认Pipeline
 =================
 
-These configurations control if the default pipelines should be enabled or not
+这些配置控制了是否应该启用默认Pipeline
 
 .. list-table::
   :widths: 15 10 10 50
   :header-rows: 1
   :stub-columns: 1
 
-  * - Configuration
-    - Default value
-    - Type
-    - Description
+  * - 配置
+    - 默认值
+    - 类型
+    - 描述
   * - pitaya.defaultpipelines.structvalidation.enabled
     - false
     - bool
-    - Whether Pitaya should enable the default struct validator for handler arguments
+    - Pitaya是否应该为处理程序参数启用默认结构验证器。
 
 Groups
 =================
 
-These configurations are used for group services implementations.
+这些配置用于组服务的实现。
 
 .. list-table::
   :widths: 15 10 10 50
   :header-rows: 1
   :stub-columns: 1
 
-  * - Configuration
-    - Default value
-    - Type
-    - Description
+  * - 配置
+    - 默认值
+    - 类型
+    - 描述
   * - pitaya.groups.etcd.endpoints
     - localhost:2379
     - string
-    - Comma separated list of etcd endpoints to be used by the groups etcd service 
+    - 逗号分隔的 etcd 端点列表，供群组 etcd 服务使用。
   * - pitaya.groups.etcd.prefix
     - pitaya/
     - string 
-    - Prefix used for every group key in etcd
+    - etcd中每个Group的key的前缀。
   * - pitaya.groups.etcd.dialtimeout
     - 5s
     - time.Time
-    - Timeout to establish the etcd group connection
+    - 建立etcd组连接的超时
   * - pitaya.groups.etcd.transactiontimeout
     - 5s
     - time.Duration
-    - Timeout to finish group request to Etcd
+    - 超时完成对Etcd的分组请求
   * - pitaya.groups.memory.tickduration
     - 30s
     - time.Duration
-    - Duration time of tick that will check if should delete group or not
+    - 根据这个tick的间隔时间来判断是否要删除组

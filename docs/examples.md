@@ -1,5 +1,5 @@
-Examples
+示例
 ========
 
-Example projects can be found [here](https://github.com/topfreegames/pitaya/tree/master/examples/demo)
+可以点击[这里](https://github.com/topfreegames/pitaya/tree/master/examples/demo) 查看示例
 

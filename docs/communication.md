@@ -1,70 +1,77 @@
-Communication
+通信
 =============
 
-In this section we will describe in detail the communication process between the client and the server. From establishing the connection, sending a request and receiving a response. The example is going to assume the application is running in cluster mode and that the target server is not the same as the one the client is connected to.
+本节我们将详细介绍客户端与服务器之间的通信过程。从建立连接，发送请求到接收响应。本例将假设应用程序在集群模式下运行，并且目标服务器与客户端连接的服务器不同。
 
 
-## Establishing the connection
+## 建立连接
 
-The overview of what happens when a client connects and makes a request is:
+客户端连接并建立请求时按照如下顺序执行：
 
-* Establish low level connection with acceptor
-* Pass the connection to the handler service
-* Handler service creates a new agent for the connection
-* Handler service reads message from the connection
-* Message is decoded with configured decoder
-* Decoded packet from the message is processed
-* First packet must be a handshake request, to which the server returns a handshake response with the serializer, route dictionary and heartbeat timeout
-* Client must then reply with a handshake ack, connection is then established
-* Data messages are processed by the handler and the target server type is extracted from the message route, the message is deserialized using the specified method
-* If the target server type is different from the current server, the server makes a remote call to the right type of server, selecting one server according to the routing function logic. The remote call includes the current representation of the client's session
-* The receiving remote server receives the request and handles it as a _Sys_ RPC call, creating a new remote agent to handle the request, this agent receives the session's representation
-* The before pipeline functions are called and the handler message is deserialized
-* The appropriate handler is then called by the remote server, which returns the response that is then serialized and the after pipeline functions are executed
-* If the backend server wants to modify the session it needs to modify and push the modifications to the frontend server explicitly
-* Once the frontend server receives the response it forwards the message to the session specifying the request message ID
-* The agent receives the requests, encodes it and sends to the low-level connection
+* 与Acceptor建立低级别的连接
+* 将连接传给Handler service
+* Handler service为连接创建一个新的Agent。
+* Handler service从连接中读取消息。
+* 用配置的解码器解码消息。
+* 对正在处理的消息进行解码
+* 第一个数据包必须是一个握手请求，服务器返回一个包含序列化器、路由字典和心跳超时的握手响应。
+* 客户端必须回复握手ACK，然后建立连接。
+* 数据信息由Handler处理，并从消息路径中提取目标服务器类型，使用指定的方法对Message进行反序列化。
+* 如果目标服务器类型与当前服务器不同，服务器会对正确类型的服务器进行远程调用，根据路由功能逻辑选择一个服务器。远程调用包括客户端会话的representation。
+* 接收Remote收到请求后，以 _Sys_ RPC调用的方式进行处理，创建一个新的Remote agent来处理该请求，该代理接收会话的representation。
+* 调用Pipeline前的函数，并对处理程序信息进行反序列化。
+* 然后，Remote调用适当的Handler，返回响应，然后将响应序列化，并执行Pipeline后函数
+* 如果Backend服务器要修改会话，需要明确地修改并推送修改内容给Frontend服务器
+* 一旦Frontend服务器收到响应，它就会将消息转发到指定请求消息ID的会话。
+* Agent收到请求后，对其进行编码，并发送至低级连接。
 
-### Acceptors
+### Acceptor（接收器）
 
-The first thing the client must do is establish a connection with the Pitaya server. And for that to happen, the server must have specified one or more acceptors.
+客户端必须做的第一件事是建立与Pitaya服务器的连接，为此，服务器必须指定一个或多个Acceptor。
 
-Acceptors are the entities responsible for listening for connections, establishing them, abstracting and forwarding them to the handler service. Pitaya comes with support for TCP and websocket acceptors. Custom acceptors can be implemented and added to Pitaya applications, they just need to implement the proper interface.
+Acceptor是负责监听连接、建立连接、抽象连接并将其转发到处理程序服务的实体。Pitaya支持TCP和websocketAcceptor。
+自定义Acceptor可以实现并添加到Pitaya应用程序中，它们只需要实现适当的接口。
 
 ### Handler service
 
-After the low level connection is established it is passed to the handler service to handle. The handler service is responsible for handling the lifecycle of the clients' connections. It reads from the low-level connection, decodes the received packets and handles them properly, calling the local server's handler if the target server type is the same as the local one or forwarding the message to the remote service otherwise.
+低级连接建立后，它被传递给Handler service进行处理。Handler service负责处理客户端连接的生命周期。它从低级连接中读取、
+解码接收到的数据包并进行适当处理，如果目标服务器类型与本地服务器相同，则调用本地服务器的处理程序，否则将消息转发到Remote service。
 
-Pitaya has a configuration to define the number of concurrent messages being processed at the same time, both local and remote messages count for the concurrency, so if the server expects to deal with slow routes this configuration might need to be tweaked a bit. The configuration is `pitaya.concurrency.handler.dispatch`.
+Pitaya有一个配置来定义同时处理的并发消息数量，本地消息和远程消息都算并发，所以如果服务器希望处理慢路由，这个配置可能需要调整一下。
+配置是`pitaya.concurrency.handler.dispatch`。
 
-### Agent
+### Agent (代理)
 
-The agent entity is responsible for storing information about the client's connection, it stores the session, encoder, serializer, state, connection, among others. It is used to communicate with the client to send messages and also ensure the connection is kept alive.
+Agent实体负责存储客户端的连接信息，它存储了会话、编码器、序列器、状态、连接等信息。它用于与客户端通信，发送消息，同时也保证了连接的有效性。
 
-### Route compression
+### Route compression (路由压缩)
 
-The application can define a dictionary of compressed routes before starting, these routes are sent to the clients on the handshake. Compressing the routes might be useful for the routes that are used a lot to reduce the communication overhead.
+应用程序可以在启动前定义一个压缩路由字典，这些路由会在握手时发送给客户端。压缩路由可能对那些经常使用的路由很有用，可以减少通信开销。
 
-### Handshake
+### Handshake (握手)
 
-The first operation that happens when a client connects is the handshake. The handshake is initiated by the client, who sends informations about the client, such as platform, version of the client library, and others, and can also send user data in this step. This data is stored in the client's session and can be accessed later. The server replies with heartbeat interval, name of the serializer and the dictionary of compressed routes.
+客户端连接时发生的第一个操作是握手。握手是由客户端发起的，客户端发送有关客户端的信息，如平台、客户端库的版本等，也可以在这一步发送用户数据。
+这些数据存储在客户端的会话中，以后可以访问。服务器回复心跳间隔、序列器名称和压缩路由字典。
 
-### Remote service
+### Remote service (远程服务)
 
-The remote service is responsible both for making RPCs and for receiving and handling them. In the case of a forwarded client request the RPC is of type _Sys_.
+Remote service既负责发出RPC，也负责接收和处理它们。在转发客户端请求的情况下，RPC的类型是 _Sys_ 。
 
-In the calling side the service is responsible for identifying the proper server to be called, both by server type and by routing logic.
+在调用端，服务负责通过服务器类型和路由逻辑来识别要调用的正确服务器。
 
-In the receiving side the service identifies it is a _Sys_ RPC and creates a remote agent to handle the request. This remote agent is short-lived, living only while the request is alive, changes to the backend session do not automatically reflect in the associated frontend session, they need to be explicitly committed by pushing them. The message is then forwarded to the appropriate handler to be processed.
+在接收端，服务识别这是一个 _Sys_ RPC，并创建一个Remote Agent来处理请求。这个Remote agent是短暂的，只在请求活着的时候活着，
+对后端会话的改变不会自动反映在关联的前端会话中，需要通过推送来明确提交。然后，消息会被转发到相应的处理程序进行处理。
 
 ### Pipeline
 
-The pipeline in Pitaya is a set of functions that can be defined to be run before or after every handler request. The functions receive the context and the raw message and should return the request object and error, they are allowed to modify the context and return a modified request. If the before function returns an error the request fails and the process is aborted.
+Pitaya中的Pipeline是一组函数，可以定义在每个处理程序请求之前或之后运行。这些函数接收上下文和原始消息，并应返回请求对象和错误，
+它们被允许修改上下文并返回修改后的请求。如果before函数返回一个错误，则请求失败，进程被中止。
 
 ### Serializer
 
-The handler must first deserialize the message before processing it. So the function responsible for calling the handler method first deserializes the message, calls the method and then serializes the response returned by the method and returns it back to the remote service.
+Handler在处理消息之前，必须先对消息进行反序列化。因此，负责调用处理程序方法的函数首先将消息反序列化，调用该方法，然后将该方法返回的响应序列化，
+并将其返回给Remote service。
 
 ### Handler
 
-Each Pitaya server can register multiple handler structures, as long as they have different names. Each structure can have multiple methods and Pitaya will choose the right structure and methods based on the called route.
+每个Pitaya服务器可以注册多个Handler结构体，只要它们有不同的名称即可。每个结构体可以有多个方法，Pitaya会根据调用的路由选择合适的结构体和方法。
